@@ -1,0 +1,7 @@
+# pnpm workspace manifest for the TAU 3346 monorepo.
+# Declares the two apps (Next.js frontend, FastAPI is Python-managed by Poetry)
+# and the shared `packages/*` workspace. Run all pnpm commands from the repo root.
+# Adding a new JS package = drop it under apps/ or packages/ and it is picked up.
+packages:
+  - "apps/nextjs"
+  - "packages/*"

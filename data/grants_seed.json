@@ -1,0 +1,102 @@
+[
+  {
+    "agency": "NIH",
+    "title": "Innovative Approaches to Early Cancer Detection (R01)",
+    "description": "Supports research developing novel biomarkers and imaging methods for the early detection of solid tumors, with emphasis on translational pipelines from discovery to clinical validation.",
+    "deadline": "2026-10-05",
+    "keywords": ["oncology", "early detection", "biomarkers", "imaging", "translational"],
+    "eligibility_text": "Open to PIs at accredited research institutions. Foreign components allowed with justification.",
+    "sub_domain": "oncology",
+    "source": "seed"
+  },
+  {
+    "agency": "NIH",
+    "title": "Neural Circuits of Chronic Pain (R21)",
+    "description": "Exploratory funding for studies mapping the neural circuitry underlying chronic pain states using electrophysiology, optogenetics, or in vivo imaging in model systems.",
+    "deadline": "2026-09-16",
+    "keywords": ["neuroscience", "chronic pain", "neural circuits", "optogenetics", "electrophysiology"],
+    "eligibility_text": "Domestic and foreign institutions eligible. Early-stage investigators encouraged.",
+    "sub_domain": "neuroscience",
+    "source": "seed"
+  },
+  {
+    "agency": "NIH",
+    "title": "Host Immune Response to Emerging Viral Pathogens (U19)",
+    "description": "Cooperative agreement funding multi-project programs characterizing innate and adaptive immune responses to emerging RNA viruses, including correlates of protection and vaccine target discovery.",
+    "deadline": "2026-11-12",
+    "keywords": ["immunology", "virology", "vaccines", "innate immunity", "correlates of protection"],
+    "eligibility_text": "Requires a multi-PI program structure. U.S. institutions as lead; international partners permitted.",
+    "sub_domain": "immunology",
+    "source": "seed"
+  },
+  {
+    "agency": "CORDIS",
+    "title": "Horizon Europe — AI for Precision Cardiology",
+    "description": "Funds consortia developing trustworthy AI tools for risk stratification and treatment selection in cardiovascular disease, with mandatory clinical validation and explainability requirements.",
+    "deadline": "2026-09-30",
+    "keywords": ["cardiology", "artificial intelligence", "precision medicine", "risk stratification", "explainability"],
+    "eligibility_text": "Requires a consortium of at least three independent legal entities from three different EU Member States or Associated Countries.",
+    "sub_domain": "cardiology",
+    "source": "seed"
+  },
+  {
+    "agency": "CORDIS",
+    "title": "Horizon Europe — Genomic Surveillance of Antimicrobial Resistance",
+    "description": "Supports cross-border platforms for genomic surveillance of antimicrobial-resistant pathogens, integrating sequencing, epidemiology, and open data sharing across health systems.",
+    "deadline": "2026-12-08",
+    "keywords": ["genomics", "antimicrobial resistance", "surveillance", "sequencing", "epidemiology"],
+    "eligibility_text": "Consortium-based. Public health agencies and academic partners encouraged to co-apply.",
+    "sub_domain": "genomics",
+    "source": "seed"
+  },
+  {
+    "agency": "CORDIS",
+    "title": "Horizon Europe — Digital Tools for Population Mental Health",
+    "description": "Funds development and evaluation of scalable digital interventions for population-level mental health, prioritizing equity, accessibility, and real-world effectiveness trials.",
+    "deadline": "2026-10-21",
+    "keywords": ["public health", "mental health", "digital health", "health equity", "effectiveness trials"],
+    "eligibility_text": "Open to EU and Associated Country entities forming an eligible consortium.",
+    "sub_domain": "public_health",
+    "source": "seed"
+  },
+  {
+    "agency": "ISF",
+    "title": "Israel Science Foundation — Individual Research Grant in Computational Biology",
+    "description": "Supports individual investigators pursuing fundamental questions in computational and systems biology, including single-cell analysis, network modeling, and method development.",
+    "deadline": "2026-11-25",
+    "keywords": ["computational biology", "single-cell", "systems biology", "network modeling", "methods"],
+    "eligibility_text": "Open to faculty at Israeli research institutions. One submission per PI per cycle.",
+    "sub_domain": "computational_biology",
+    "source": "seed"
+  },
+  {
+    "agency": "ISF",
+    "title": "Israel Science Foundation — Equipment Grant for Advanced Microscopy",
+    "description": "Provides shared-infrastructure funding for advanced light and electron microscopy platforms supporting cell-biology and neuroscience research communities.",
+    "deadline": "2026-09-09",
+    "keywords": ["microscopy", "imaging", "cell biology", "shared infrastructure", "neuroscience"],
+    "eligibility_text": "Institutional applications for shared equipment. Co-investment from the host institution required.",
+    "sub_domain": "neuroscience",
+    "source": "seed"
+  },
+  {
+    "agency": "BSF",
+    "title": "US–Israel Binational Science Foundation — Collaborative Oncology Research",
+    "description": "Funds joint US–Israel research teams studying tumor microenvironment and immunotherapy resistance, requiring substantive scientific collaboration between the two partners.",
+    "deadline": "2026-10-30",
+    "keywords": ["oncology", "immunotherapy", "tumor microenvironment", "binational", "resistance"],
+    "eligibility_text": "Requires one eligible US investigator and one eligible Israeli investigator as joint PIs.",
+    "sub_domain": "oncology",
+    "source": "seed"
+  },
+  {
+    "agency": "BSF",
+    "title": "US–Israel Binational Science Foundation — Cardiometabolic Disease Mechanisms",
+    "description": "Supports binational teams investigating molecular mechanisms linking metabolism and cardiovascular disease, with an emphasis on translational relevance and shared data resources.",
+    "deadline": "2026-12-01",
+    "keywords": ["cardiology", "metabolism", "cardiometabolic", "binational", "translational"],
+    "eligibility_text": "Joint US–Israel PI structure mandatory. Budgets administered separately in each country.",
+    "sub_domain": "cardiology",
+    "source": "seed"
+  }
+]

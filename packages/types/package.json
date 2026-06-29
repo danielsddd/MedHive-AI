@@ -1,0 +1,12 @@
+{
+  "name": "@tau3346/types",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared cross-app type + constant contracts (mirrors the FastAPI schemas).",
+  "main": "constants.ts",
+  "types": "constants.ts",
+  "exports": {
+    "./constants": "./constants.ts",
+    "./researcher-profile": "./researcher-profile.ts"
+  }
+}

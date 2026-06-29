@@ -1,0 +1,32 @@
+# Keeps secrets, build artefacts, caches, and large generated data out of version control.
+# .env files are NEVER committed; only .env.example is. See README for key setup.
+.env
+.env.*
+!.env.example
+!apps/nextjs/.env.local.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+dist/
+*.tsbuildinfo
+
+# Models / data caches (downloaded into Docker volume, not committed)
+hf_cache/
+data/annotation_tasks.json
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json

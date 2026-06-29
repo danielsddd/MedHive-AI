@@ -1,0 +1,57 @@
+# Poetry manifest for the FastAPI backend (the one backend surface). Pins the full Phase 0
+# stack: web (FastAPI/uvicorn), data (SQLAlchemy/asyncpg/pgvector/alembic), AI (LiteLLM,
+# sentence-transformers, instructor), queue (ARQ/redis), parsing (PyMuPDF/pdfplumber/docx),
+# and tooling (Ruff, pytest, VCR.py). Heavy ML libs load lazily so offline mode stays light.
+[tool.poetry]
+name = "tau3346-fastapi"
+version = "0.0.0"
+description = "TAU 3346 medical research platform — FastAPI backend"
+authors = ["Daniel Simanovsky", "Roei Ben Artzi"]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.115.0"
+uvicorn = { extras = ["standard"], version = "^0.32.0" }
+pydantic = "^2.9.0"
+pydantic-settings = "^2.6.0"
+sqlalchemy = { extras = ["asyncio"], version = "^2.0.36" }
+asyncpg = "^0.30.0"
+alembic = "^1.14.0"
+pgvector = "^0.3.6"
+redis = "^5.2.0"
+arq = "^0.26.0"
+slowapi = "^0.1.9"
+litellm = "^1.52.0"
+instructor = "^1.6.0"
+sentence-transformers = "^3.3.0"
+numpy = "^2.1.0"
+supabase = "^2.10.0"
+pymupdf = "^1.24.0"
+pdfplumber = "^0.11.0"
+python-docx = "^1.1.0"
+biopython = "^1.84"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.0"
+pytest-asyncio = "^0.24.0"
+pytest-cov = "^6.0.0"
+pytest-recording = "^0.13.0"
+httpx = "^0.27.0"
+ruff = "^0.7.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+addopts = "--cov=. --cov-report=term-missing"
+testpaths = ["tests"]

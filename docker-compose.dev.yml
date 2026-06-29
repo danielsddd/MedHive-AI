@@ -1,0 +1,108 @@
+# =====================================================================
+# TAU 3346 — DEVELOPMENT stack (docker compose -f docker-compose.dev.yml up --build)
+# Self-hosted: pgvector Postgres + Redis. FastAPI owns all business logic; a SEPARATE
+# arq-worker runs the queue. Next.js is auth/session glue only. Everything boots with NO
+# API keys (offline stub providers); paste keys into .env to go live with zero code change.
+# The Supabase SERVICE_ROLE key is passed to the BACKEND ONLY — never to the frontend.
+# =====================================================================
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-medcollab}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_local_only}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app} -d ${POSTGRES_DB:-medcollab}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  fastapi:
+    build:
+      context: ./apps/fastapi
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      # Container-network DSNs override any localhost values from .env.
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-change_me_local_only}@postgres:5432/${POSTGRES_DB:-medcollab}
+      REDIS_URL: redis://redis:6379/0
+      HF_HOME: /hf_cache
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./apps/fastapi:/app
+      - hf_cache:/hf_cache
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  arq-worker:
+    build:
+      context: ./apps/fastapi
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-change_me_local_only}@postgres:5432/${POSTGRES_DB:-medcollab}
+      REDIS_URL: redis://redis:6379/0
+      HF_HOME: /hf_cache
+    volumes:
+      - ./apps/fastapi:/app
+      - hf_cache:/hf_cache
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["arq", "worker.WorkerSettings"]
+
+  nextjs:
+    image: node:20-bookworm-slim
+    working_dir: /repo/apps/nextjs
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
+      NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_URL:-}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/repo
+      - node_modules_root:/repo/node_modules
+      - node_modules_next:/repo/apps/nextjs/node_modules
+    depends_on:
+      - fastapi
+    command: >
+      sh -c "corepack enable &&
+             corepack prepare pnpm@9.12.0 --activate &&
+             pnpm install &&
+             pnpm --filter @tau3346/nextjs dev"
+
+volumes:
+  pgdata:
+  redisdata:
+  hf_cache:
+  node_modules_root:
+  node_modules_next:

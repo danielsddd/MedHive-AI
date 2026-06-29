@@ -1,0 +1,51 @@
+# Continuous integration for TAU 3346. Phase-0 scope deliberately keeps CI minimal: Python
+# lint (Ruff) + backend tests (pytest, offline stub mode so no keys/services are needed) and
+# frontend lint (Biome) + typecheck. No Sentry/k6/PromptFoo here — those arrive in later phases.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/fastapi
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Poetry
+        run: pip install "poetry>=1.8,<2.0"
+      - name: Install dependencies
+        run: poetry install --no-root --no-interaction
+      - name: Ruff lint
+        run: poetry run ruff check .
+      - name: Pytest (offline stub mode)
+        env:
+          LLM_MODE: offline
+          EMBEDDING_MODE: offline
+          AUTH_MODE: dev
+        run: poetry run pytest -q
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile=false
+      - name: Biome check
+        run: pnpm biome check .
+      - name: Typecheck
+        run: pnpm --filter @tau3346/nextjs typecheck

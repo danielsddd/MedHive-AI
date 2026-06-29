@@ -1,0 +1,23 @@
+{
+  "name": "tau3346-medical-research-platform",
+  "private": true,
+  "version": "0.0.0",
+  "description": "TAU Project 3346 — AI platform for medical research collaboration (monorepo root).",
+  "scripts": {
+    "dev": "docker compose -f docker-compose.dev.yml up --build",
+    "down": "docker compose -f docker-compose.dev.yml down",
+    "health": "bash scripts/healthcheck.sh",
+    "models": "bash scripts/download_models.sh",
+    "lint": "biome check .",
+    "format": "biome format --write ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "husky": "9.1.6",
+    "lint-staged": "15.2.10"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json}": "biome check --write --no-errors-on-unmatched"
+  },
+  "packageManager": "pnpm@9.12.0"
+}

@@ -1,0 +1,54 @@
+/* Global styles + the clinical design tokens (calm slate canvas, deep teal accent).
+   Colours are HSL CSS variables consumed by tailwind.config.ts so the whole UI themes
+   from one place. Keep component files free of raw hex values — reference the tokens. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 200 24% 97%;
+  --surface: 0 0% 100%;
+  --ink: 205 30% 16%;
+  --muted: 205 12% 46%;
+  --line: 205 18% 88%;
+  --accent: 184 64% 28%;
+  --accent-ink: 0 0% 100%;
+}
+
+* { border-color: hsl(var(--line)); }
+
+body {
+  background: hsl(var(--bg));
+  color: hsl(var(--ink));
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.card {
+  background: hsl(var(--surface));
+  border: 1px solid hsl(var(--line));
+  border-radius: 14px;
+  box-shadow: 0 1px 2px hsl(205 30% 16% / 0.04), 0 8px 24px hsl(205 30% 16% / 0.04);
+}
+
+.field {
+  width: 100%;
+  background: hsl(var(--surface));
+  border: 1px solid hsl(var(--line));
+  border-radius: 10px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.field:focus { border-color: hsl(var(--accent)); box-shadow: 0 0 0 3px hsl(var(--accent) / 0.12); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  background: hsl(var(--accent)); color: hsl(var(--accent-ink));
+  border-radius: 10px; padding: 0.6rem 1rem; font-weight: 600; font-size: 0.95rem;
+  cursor: pointer; transition: opacity 0.15s ease, transform 0.05s ease;
+}
+.btn:hover { opacity: 0.92; }
+.btn:active { transform: translateY(1px); }
+.btn[disabled] { opacity: 0.5; cursor: not-allowed; }
