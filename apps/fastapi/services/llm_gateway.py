@@ -1,56 +1,89 @@
 """
 Provider-agnostic LLM gateway — the single call point for every completion in the system.
-Model strings come only from config, so swapping Gemini -> Groq -> Cerebras -> GitHub Models
-is a .env change, never a code change. Routes through LiteLLM (uniform interface across
-providers) with an automatic primary->fallback on rate limits. When no provider key is
-present (offline mode) it returns a deterministic stub completion so flows and tests run
-end-to-end with zero setup.
+Model strings come only from config so swapping providers is a .env change, never a code
+change. Routes through LiteLLM (uniform interface across providers). No cross-provider
+fallback — Daniel and Roei each have their own keys giving double the free-tier quota.
+Rate limit errors surface as a clean APIError so the frontend shows a friendly message.
 """
 from __future__ import annotations
 
-import json
-
 from core.config import settings
+from core.errors import APIError
 from core.logging import get_logger
 
 logger = get_logger(__name__)
 
 
-def _stub_completion(messages: list[dict]) -> str:
-    """Offline placeholder so the pipeline never hard-fails without keys (dev only)."""
-    last = messages[-1]["content"] if messages else ""
-    return json.dumps({"stub": True, "echo": str(last)[:200]})
-
-
 async def complete(
     messages: list[dict],
     model: str | None = None,
-    fallback: str | None = None,
     max_tokens: int = 1000,
     **kwargs,
 ) -> str:
-    """Run one completion. Falls back to the secondary model on rate-limit errors."""
-    if not settings.llm_is_live():
-        logger.info("LLM gateway in OFFLINE mode — returning stub completion.")
-        return _stub_completion(messages)
+    """
+    Run one LLM completion for extraction tasks (uses EXTRACTION_MODEL = Gemini 2.5 Flash).
+    Raises APIError on rate limit or provider error — never falls back to a different provider.
+    """
+    import litellm  # lazy import — keeps startup fast
 
-    import litellm  # imported lazily so offline mode needs no LLM stack
-
-    primary = model or settings.EXTRACTION_MODEL
-    secondary = fallback or settings.EXTRACTION_FALLBACK
+    target = model or settings.EXTRACTION_MODEL
     try:
         resp = await litellm.acompletion(
-            model=primary, messages=messages, max_tokens=max_tokens, **kwargs
+            model=target,
+            messages=messages,
+            max_tokens=max_tokens,
+            **kwargs,
         )
         return resp.choices[0].message.content
     except litellm.exceptions.RateLimitError as exc:
-        logger.warning("Rate limit on %s -> falling back to %s (%s)", primary, secondary, exc)
+        logger.warning("Rate limit on %s: %s", target, exc)
+        raise APIError("rate_limit_exceeded", status_code=429)
+    except Exception as exc:
+        logger.error("LLM completion failed on %s: %s", target, exc)
+        raise APIError("extraction_failed", status_code=502)
+
+
+async def explain(
+    messages: list[dict],
+    max_tokens: int = 500,
+    **kwargs,
+) -> str:
+    """
+    Run one LLM completion for explanation tasks (uses EXPLANATION_MODEL = Groq gpt-oss-120b).
+    Falls back to EXPLANATION_FALLBACK (gpt-oss-20b) on rate limit — same Groq key,
+    smaller model with a separate quota bucket. Raises APIError if both are exhausted.
+    """
+    import litellm
+
+    primary = settings.EXPLANATION_MODEL
+    fallback = settings.EXPLANATION_FALLBACK
+
+    try:
         resp = await litellm.acompletion(
-            model=secondary, messages=messages, max_tokens=max_tokens, **kwargs
+            model=primary,
+            messages=messages,
+            max_tokens=max_tokens,
+            **kwargs,
         )
         return resp.choices[0].message.content
+    except litellm.exceptions.RateLimitError as exc:
+        logger.warning("Rate limit on %s -> trying fallback %s (%s)", primary, fallback, exc)
+        try:
+            resp = await litellm.acompletion(
+                model=fallback,
+                messages=messages,
+                max_tokens=max_tokens,
+                **kwargs,
+            )
+            return resp.choices[0].message.content
+        except litellm.exceptions.RateLimitError:
+            logger.warning("Rate limit on fallback %s too — both Groq quota buckets exhausted", fallback)
+            raise APIError("rate_limit_exceeded", status_code=429)
+    except Exception as exc:
+        logger.error("Explanation failed on %s: %s", primary, exc)
+        raise APIError("extraction_failed", status_code=502)
 
 
 def gateway_status() -> str:
-    """'live' | 'offline' — surfaced by /healthz without exposing keys."""
-    return "live" if settings.llm_is_live() else "offline"
+    """'live' — always, since keys are required config fields."""
+    return "live"
