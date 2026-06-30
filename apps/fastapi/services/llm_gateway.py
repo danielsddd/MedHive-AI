@@ -8,10 +8,9 @@ every key for a provider is exhausted does a clean APIError surface to the calle
 """
 from __future__ import annotations
 
+from core.config import settings
 from core.errors import ERRORS, APIError
 from core.logging import get_logger
-
-from core.config import settings
 
 logger = get_logger(__name__)
 
