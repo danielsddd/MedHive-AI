@@ -1,15 +1,11 @@
 """
 Root pytest bootstrap for the backend. Puts apps/fastapi on sys.path so tests can import
-core/services/routers directly, and forces offline modes by default so the suite never
-touches a real provider, model download, or database. VCR.py is used for any live-shaped
-LLM call recorded later.
+core/services/routers directly. The app is live-only (no offline/dev mode switches), so
+tests rely on CI-injected placeholder credentials (see .github/workflows/ci.yml) to satisfy
+Settings()'s required fields, and use mocks/monkeypatch for any test that would otherwise
+make a real network call to Gemini, Groq, or Supabase.
 """
-import os
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-
-os.environ.setdefault("LLM_MODE", "offline")
-os.environ.setdefault("EMBEDDING_MODE", "offline")
-os.environ.setdefault("AUTH_MODE", "dev")

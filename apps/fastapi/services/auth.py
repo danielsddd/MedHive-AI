@@ -1,9 +1,9 @@
 """
-Authentication boundary. In live mode it validates the Supabase-issued JWT on every
-protected route and returns the current user; in dev/offline mode (no Supabase keys) it
-accepts any bearer token and returns a stable dev user, so the frontend and protected
-routes can be built before auth is wired. Roles are read as DATA (user_roles table),
-never as if-statements. The service-role key stays here in the backend and is never logged.
+Authentication boundary. Validates the Supabase-issued JWT on every protected route and
+returns the current user. Live-only — there is no dev/offline bypass: a real Supabase
+project is a required config field (core/config.py), so every request is checked against
+real Supabase Auth. Roles are read as DATA (user_roles table), never as if-statements.
+The service-role key stays here in the backend and is never logged.
 """
 from __future__ import annotations
 
@@ -21,9 +21,6 @@ from core.logging import get_logger
 logger = get_logger(__name__)
 security = HTTPBearer(auto_error=False)
 
-# Fixed identity used only in dev/offline mode so flows are reproducible.
-_DEV_USER_ID = uuid.UUID("00000000-0000-0000-0000-0000000000d0")
-
 
 @dataclass(frozen=True)
 class CurrentUser:
@@ -33,7 +30,7 @@ class CurrentUser:
 
 
 def _supabase_client():
-    from supabase import create_client  # lazy import; not needed in dev mode
+    from supabase import create_client
 
     return create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_ROLE_KEY)
 
@@ -44,10 +41,6 @@ async def get_current_user(
     """FastAPI dependency: resolves the caller or raises 401 with a stable error code."""
     if creds is None or not creds.credentials:
         raise APIError("jwt_invalid", "Missing bearer token.", status_code=401)
-
-    if not settings.auth_is_live():
-        # Dev/offline: trust the presented token, return the stable dev user.
-        return CurrentUser(id=_DEV_USER_ID, email="dev@local", role=DEFAULT_ROLE)
 
     try:
         resp = _supabase_client().auth.get_user(creds.credentials)

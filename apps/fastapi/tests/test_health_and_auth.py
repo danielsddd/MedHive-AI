@@ -1,8 +1,11 @@
 """
 Endpoint smoke tests via FastAPI's ASGI test client. /healthz must always return the
-4-key shape (db/redis/embedding_service/gateway) without throwing, even with no database;
-/auth/me must 401 with the stable jwt_invalid code when no token is sent and 200 with the
-dev user when a bearer token is present in dev mode.
+4-key shape (db/redis/embedding_service/gateway) without throwing, even with no database.
+/auth/me must 401 with the stable jwt_invalid code when no token is sent, and must 401
+when Supabase rejects the token (with placeholder CI credentials there is no real Supabase
+project to validate against, so any token is correctly rejected — no real network call is
+made or needed). A genuine 200 path is covered by integration tests against a real
+Supabase project, not this unit suite.
 """
 from fastapi.testclient import TestClient
 
@@ -26,7 +29,10 @@ def test_me_requires_token():
     assert r.json()["code"] == "jwt_invalid"
 
 
-def test_me_dev_mode_returns_user():
-    r = client.get("/auth/me", headers={"Authorization": "Bearer devtoken"})
-    assert r.status_code == 200
-    assert r.json()["role"] == "researcher"
+def test_me_rejects_invalid_token():
+    """With placeholder CI credentials (no real Supabase project), any bearer token
+    fails validation and the endpoint must fail closed with jwt_invalid — never a 500
+    or a leaked stack trace."""
+    r = client.get("/auth/me", headers={"Authorization": "Bearer not-a-real-jwt"})
+    assert r.status_code == 401
+    assert r.json()["code"] == "jwt_invalid"
