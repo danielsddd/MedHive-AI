@@ -14,12 +14,13 @@ __pycache__/
 .coverage
 htmlcov/
 
-# Node / Next.js
+# Node / Next.js / pnpm
 node_modules/
 .next/
 out/
 dist/
 *.tsbuildinfo
+.pnpm-store/
 
 # Models / data caches (downloaded into Docker volume, not committed)
 hf_cache/
