@@ -7,6 +7,10 @@
 # (the app is live-only, no offline stub mode). Actual LLM/embedding calls in the test suite
 # are mocked or replayed from VCR.py cassettes, so no real network access or real keys are
 # ever needed in CI; the placeholders only satisfy Pydantic's required-field validation.
+#
+# Caching: the Poetry virtualenv is cached by hash of poetry.lock, so once poetry.lock is
+# committed, dependency installation (~5+ minutes uncached, mostly torch/transformers) drops
+# to seconds on cache hits. Cache key changes automatically whenever poetry.lock changes.
 name: CI
 
 on:
@@ -37,6 +41,15 @@ jobs:
           python-version: "3.11"
       - name: Install Poetry
         run: pip install "poetry>=1.8,<2.0"
+      - name: Cache Poetry virtualenv
+        uses: actions/cache@v4
+        with:
+          path: apps/fastapi/.venv
+          key: poetry-${{ runner.os }}-${{ hashFiles('apps/fastapi/poetry.lock') }}
+          restore-keys: |
+            poetry-${{ runner.os }}-
+      - name: Configure Poetry to use in-project venv
+        run: poetry config virtualenvs.in-project true
       - name: Install dependencies
         run: poetry install --no-root --no-interaction
       - name: Ruff lint

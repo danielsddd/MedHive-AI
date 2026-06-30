@@ -7,13 +7,13 @@ needed; target_metadata stays None. Supports both online and offline modes.
 from __future__ import annotations
 
 import asyncio
+import sys
+from pathlib import Path
 
-from alembic import context
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 
-import sys
-from pathlib import Path
+from alembic import context
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 from core.config import settings  # noqa: E402

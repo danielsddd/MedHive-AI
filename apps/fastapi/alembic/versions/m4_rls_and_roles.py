@@ -104,7 +104,7 @@ def upgrade() -> None:
         RETURNS TABLE(profile_id UUID, user_id UUID, score FLOAT)
         LANGUAGE SQL
         SECURITY DEFINER
-        SET search_path = public
+        SET search_path = public, extensions
         AS $$
             SELECT id, user_id, 1 - (embedding <=> query_embedding) AS score
             FROM profiles
