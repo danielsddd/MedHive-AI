@@ -7,9 +7,13 @@ slowapi, keyed on the authenticated user id so one user's quota can't starve ano
 PubMed-id and ORCID-callback ingestion branches are stubbed for Phase 1 per the build
 guide ("only the CV branch must fully work for mid-presentation") and return 202 with a
 not_implemented status rather than 404, so the API surface is forward-compatible.
-"""
-from __future__ import annotations
 
+NOTE: this file deliberately does NOT use `from __future__ import annotations`. FastAPI
+resolves File()/UploadFile parameters at import time via runtime type introspection;
+postponed (string) annotations break that resolution with
+"Invalid args for response field! ForwardRef('UploadFile')". Every other file in this
+codebase uses the future import; this is the one documented exception.
+"""
 import uuid
 
 from core.errors import ERRORS, APIError
