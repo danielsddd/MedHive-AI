@@ -1,6 +1,12 @@
 # Continuous integration for TAU 3346. Phase-0 scope deliberately keeps CI minimal: Python
-# lint (Ruff) + backend tests (pytest, offline stub mode so no keys/services are needed) and
-# frontend lint (Biome) + typecheck. No Sentry/k6/PromptFoo here — those arrive in later phases.
+# lint (Ruff) + backend tests (pytest) and frontend lint (Biome) + typecheck. No Sentry/k6/
+# PromptFoo here — those arrive in later phases.
+#
+# Backend tests run with PLACEHOLDER credentials (not real keys) so Settings() can construct
+# without crashing — config.py requires Gemini/Groq/Supabase keys to be present at all times
+# (the app is live-only, no offline stub mode). Actual LLM/embedding calls in the test suite
+# are mocked or replayed from VCR.py cassettes, so no real network access or real keys are
+# ever needed in CI; the placeholders only satisfy Pydantic's required-field validation.
 name: CI
 
 on:
@@ -14,6 +20,16 @@ jobs:
     defaults:
       run:
         working-directory: apps/fastapi
+    env:
+      # Placeholder credentials — never real keys. Satisfies Settings() required fields only;
+      # tests must not make real network calls (use mocks / VCR.py cassettes instead).
+      GEMINI_API_KEY_DANIEL: "ci-placeholder-not-a-real-key"
+      GROQ_API_KEY_DANIEL: "ci-placeholder-not-a-real-key"
+      SUPABASE_URL: "https://ci-placeholder.supabase.co"
+      SUPABASE_ANON_KEY: "ci-placeholder-anon-key"
+      SUPABASE_SERVICE_ROLE_KEY: "ci-placeholder-service-role-key"
+      DATABASE_URL: "postgresql+asyncpg://app:ci@localhost:5432/medcollab_ci"
+      REDIS_URL: "redis://localhost:6379/0"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -25,11 +41,7 @@ jobs:
         run: poetry install --no-root --no-interaction
       - name: Ruff lint
         run: poetry run ruff check .
-      - name: Pytest (offline stub mode)
-        env:
-          LLM_MODE: offline
-          EMBEDDING_MODE: offline
-          AUTH_MODE: dev
+      - name: Pytest
         run: poetry run pytest -q
 
   frontend:

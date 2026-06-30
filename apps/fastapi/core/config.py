@@ -2,8 +2,10 @@
 Central application settings — the SINGLE source of truth for every tunable value,
 model string, rate cap, and secret. All model names live here as config strings and
 are never hard-coded in business logic. Keys are REQUIRED — the app runs live only.
-Both students (Daniel + Roei) keep their own keys in the shared .env; swapping the
-active key is a one-line .env edit, never a code change.
+Daniel and Roei each keep their own keys in the shared .env (suffixed _DANIEL / _ROEI).
+gemini_keys() / groq_keys() / cerebras_keys() return them in priority order so the
+gateway can automatically rotate to the next student's key on a rate-limit error —
+no manual .env editing needed when one key's quota runs out.
 Loaded once at import as the module-level `settings` singleton.
 """
 from __future__ import annotations
@@ -30,15 +32,11 @@ class Settings(BaseSettings):
     VECTOR_DIMENSIONS: int = 768
 
     # ---- Model strings (config only — never hard-coded in logic) ----
-    # Gemini 2.5 Flash: best free model for long CV extraction (1M context window)
     EXTRACTION_MODEL: str = "gemini/gemini-2.5-flash"
-    # gpt-oss-120b: Groq's recommended replacement for llama-3.3-70b (deprecated Jun 17 2026)
     EXPLANATION_MODEL: str = "groq/openai/gpt-oss-120b"
-    # gpt-oss-20b: Groq's recommended replacement for llama-3.1-8b-instant (deprecated Jun 17 2026)
     EXPLANATION_FALLBACK: str = "groq/openai/gpt-oss-20b"
-    # Embedding models
-    EMBEDDING_MODEL_LOCAL: str = "all-mpnet-base-v2"    # self-hosted, 768-dim, locked
-    EMBEDDING_MODEL_API: str = "gemini-embedding-001"   # API path, truncate+renorm to 768
+    EMBEDDING_MODEL_LOCAL: str = "all-mpnet-base-v2"
+    EMBEDDING_MODEL_API: str = "gemini-embedding-001"
     EMBEDDING_MODEL_ACTIVE: str = "local"               # local | api
     ACTIVE_EMBEDDING_COLUMN: str = "embedding"
 
@@ -46,12 +44,15 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://app:change_me_local_only@postgres:5432/medcollab"
     REDIS_URL: str = "redis://redis:6379/0"
 
-    # ---- Provider API keys (REQUIRED — no stubs, no fallback to a different provider) ----
-    # Swap between _DANIEL and _ROEI values in .env when hitting rate limits
-    GEMINI_API_KEY: str                 # extraction LLM + API embeddings
-    GROQ_API_KEY: str                   # explanation LLM
-    CEREBRAS_API_KEY: str | None = None # optional — available if needed
-    GITHUB_MODELS_TOKEN: str | None = None  # optional — available if needed
+    # ---- Provider API keys — per-student, REQUIRED at least one per provider ----
+    # Daniel's key is tried first; Roei's is the automatic rotation target on rate limit.
+    GEMINI_API_KEY_DANIEL: str | None = None
+    GEMINI_API_KEY_ROEI: str | None = None
+    GROQ_API_KEY_DANIEL: str | None = None
+    GROQ_API_KEY_ROEI: str | None = None
+    CEREBRAS_API_KEY_DANIEL: str | None = None
+    CEREBRAS_API_KEY_ROEI: str | None = None
+    GITHUB_MODELS_TOKEN: str | None = None
 
     # ---- Supabase Auth (JWT issuer only — app DB is local pgvector) ----
     SUPABASE_URL: str
@@ -78,17 +79,35 @@ class Settings(BaseSettings):
 
     @cached_property
     def asyncpg_dsn(self) -> str:
-        # asyncpg wants a plain postgresql:// DSN (no SQLAlchemy +asyncpg suffix)
         return self.DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
 
+    def gemini_keys(self) -> list[str]:
+        """Daniel's key first, then Roei's. Used by the gateway for automatic rotation."""
+        return [k for k in (self.GEMINI_API_KEY_DANIEL, self.GEMINI_API_KEY_ROEI) if k]
+
+    def groq_keys(self) -> list[str]:
+        return [k for k in (self.GROQ_API_KEY_DANIEL, self.GROQ_API_KEY_ROEI) if k]
+
+    def cerebras_keys(self) -> list[str]:
+        return [k for k in (self.CEREBRAS_API_KEY_DANIEL, self.CEREBRAS_API_KEY_ROEI) if k]
+
     def llm_is_live(self) -> bool:
-        return True     # always live — keys are required fields
+        return bool(self.gemini_keys() and self.groq_keys())
 
     def embedding_is_local(self) -> bool:
         return self.EMBEDDING_MODEL_ACTIVE == "local"
 
     def auth_is_live(self) -> bool:
-        return True     # always live — keys are required fields
+        return True     # always live — Supabase keys are required fields
 
 
 settings = Settings()
+
+if not settings.gemini_keys():
+    raise RuntimeError(
+        "No Gemini key configured. Set GEMINI_API_KEY_DANIEL and/or GEMINI_API_KEY_ROEI in .env."
+    )
+if not settings.groq_keys():
+    raise RuntimeError(
+        "No Groq key configured. Set GROQ_API_KEY_DANIEL and/or GROQ_API_KEY_ROEI in .env."
+    )

@@ -2,17 +2,19 @@
 Embedding service — the ONLY place that turns text into a 768-dim vector. Two paths:
   local (default): all-mpnet-base-v2 via SentenceTransformer, self-hosted, profile text
                    never leaves our infrastructure (hard rule).
-  api:             gemini-embedding-001, truncated + L2-renormalised to 768 dims (MRL output).
+  api:             gemini-embedding-001, truncated + L2-renormalised to 768 dims (MRL
+                   output). Rotates across Daniel's and Roei's Gemini keys on rate limit,
+                   same as the LLM gateway.
 L2-normalises every output so cosine == dot product. Keys are required — no offline stubs.
 Raises APIError with stable code on failure so the frontend always gets a clean message.
 """
 from __future__ import annotations
 
 import numpy as np
+from core.errors import ERRORS, APIError
+from core.logging import get_logger
 
 from core.config import settings
-from core.errors import APIError
-from core.logging import get_logger
 
 logger = get_logger(__name__)
 
@@ -26,6 +28,7 @@ def _load_model():
         return _model
     try:
         from sentence_transformers import SentenceTransformer
+
         _model = SentenceTransformer(settings.EMBEDDING_MODEL_LOCAL)
         logger.info("Loaded local embedding model: %s", settings.EMBEDDING_MODEL_LOCAL)
         return _model
@@ -42,6 +45,48 @@ def _l2_normalise(vec: np.ndarray) -> np.ndarray:
     return (vec / norm).astype(np.float32) if norm > 0 else vec.astype(np.float32)
 
 
+def _embed_via_api(text: str) -> np.ndarray:
+    """
+    gemini-embedding-001 via google-generativeai SDK. Rotates across all configured
+    Gemini keys (Daniel -> Roei) on a rate-limit error before giving up.
+    """
+    keys = settings.gemini_keys()
+    if not keys:
+        raise APIError("provider_unavailable", "No Gemini API key configured.", status_code=503)
+
+    import google.generativeai as genai
+
+    last_exc: Exception | None = None
+    for i, key in enumerate(keys):
+        try:
+            genai.configure(api_key=key)
+            result = genai.embed_content(
+                model=f"models/{settings.EMBEDDING_MODEL_API}",
+                content=text,
+                task_type="RETRIEVAL_DOCUMENT",
+                output_dimensionality=settings.VECTOR_DIMENSIONS,
+            )
+            vec = np.array(result["embedding"], dtype=np.float32)
+            return _l2_normalise(vec)
+        except Exception as exc:
+            last_exc = exc
+            is_rate_limit = "429" in str(exc) or "RESOURCE_EXHAUSTED" in str(exc).upper()
+            if is_rate_limit and i < len(keys) - 1:
+                who = "Daniel" if i == 0 else "Roei"
+                logger.warning(
+                    "Embedding rate limit (key #%d/%s) -> rotating to next key", i + 1, who
+                )
+                continue
+            logger.error("API embedding failed: %s", exc)
+            raise APIError(
+                "embedding_unavailable", ERRORS["embedding_unavailable"], status_code=503
+            ) from exc
+
+    raise APIError(
+        "embedding_unavailable", ERRORS["embedding_unavailable"], status_code=503
+    ) from last_exc
+
+
 def embed_text(text: str) -> np.ndarray:
     """
     Return a VECTOR_DIMENSIONS-length (768), L2-normalised float32 embedding.
@@ -55,21 +100,16 @@ def embed_text(text: str) -> np.ndarray:
             return _l2_normalise(vec)
         except RuntimeError as exc:
             logger.error("Local embedding failed: %s", exc)
-            raise APIError("embedding_unavailable", status_code=503)
+            raise APIError(
+                "embedding_unavailable", ERRORS["embedding_unavailable"], status_code=503
+            ) from exc
         except Exception as exc:
             logger.error("Unexpected local embedding error: %s", exc)
-            raise APIError("embedding_unavailable", status_code=503)
+            raise APIError(
+                "embedding_unavailable", ERRORS["embedding_unavailable"], status_code=503
+            ) from exc
     else:
-        # API path — gemini-embedding-001 returns >768 dims (MRL); truncate then renormalise
-        try:
-            import litellm
-            resp = litellm.embedding(model=settings.EMBEDDING_MODEL_API, input=[text])
-            vec = np.array(resp["data"][0]["embedding"], dtype=np.float32)
-            vec = vec[:settings.VECTOR_DIMENSIONS]  # truncate MRL output to locked 768 dims
-            return _l2_normalise(vec)
-        except Exception as exc:
-            logger.error("API embedding failed (%s): %s", settings.EMBEDDING_MODEL_API, exc)
-            raise APIError("embedding_unavailable", status_code=503)
+        return _embed_via_api(text)
 
 
 def embed_batch(texts: list[str]) -> list[np.ndarray]:
@@ -85,10 +125,14 @@ def embed_batch(texts: list[str]) -> list[np.ndarray]:
             return [_l2_normalise(np.asarray(v, dtype=np.float32)) for v in vecs]
         except RuntimeError as exc:
             logger.error("Local batch embedding failed: %s", exc)
-            raise APIError("embedding_unavailable", status_code=503)
+            raise APIError(
+                "embedding_unavailable", ERRORS["embedding_unavailable"], status_code=503
+            ) from exc
         except Exception as exc:
             logger.error("Unexpected local batch embedding error: %s", exc)
-            raise APIError("embedding_unavailable", status_code=503)
+            raise APIError(
+                "embedding_unavailable", ERRORS["embedding_unavailable"], status_code=503
+            ) from exc
     else:
         return [embed_text(t) for t in texts]
 
