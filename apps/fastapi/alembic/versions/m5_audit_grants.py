@@ -5,6 +5,10 @@ no UPDATE, no DELETE — making the audit trail immutable in practice at the dat
 This is the final migration; running `alembic downgrade base && alembic upgrade head` must
 reproduce an identical schema.
 
+Each DDL statement is its own op.execute() call — asyncpg's prepared-statement protocol
+rejects multiple SQL commands in a single execute(). The DO $$ ... END $$ block is one
+statement on its own; the REVOKE/GRANT that follow it are split into separate calls.
+
 Revision ID: m5_audit_grants
 Revises: m4_rls_and_roles
 """
@@ -25,12 +29,11 @@ def upgrade() -> None:
                 CREATE ROLE app_writer NOLOGIN;
             END IF;
         END $$;
-
-        -- INSERT only. Deliberately NO UPDATE and NO DELETE grants, ever.
-        REVOKE ALL ON audit_logs FROM app_writer;
-        GRANT INSERT ON audit_logs TO app_writer;
         """
     )
+    # INSERT only. Deliberately NO UPDATE and NO DELETE grants, ever.
+    op.execute("REVOKE ALL ON audit_logs FROM app_writer;")
+    op.execute("GRANT INSERT ON audit_logs TO app_writer;")
 
 
 def downgrade() -> None:

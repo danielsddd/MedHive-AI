@@ -5,6 +5,9 @@ so the same RLS policies that run on hosted Supabase also apply cleanly on the l
 pgvector Postgres that powers the demo. auth.uid() reads the JWT subject from a session
 GUC, exactly mirroring Supabase semantics.
 
+Each DDL statement is its own op.execute() call — asyncpg's prepared-statement protocol
+rejects multiple SQL commands in a single execute(), so one statement per call is required.
+
 Revision ID: m1_extension
 Revises:
 """

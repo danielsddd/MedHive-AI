@@ -5,6 +5,10 @@ grants, matches, job_status, audit_logs). The profiles table carries the active 
 plus separate experiment columns and the QC fields (sub_domain, sub_cluster, source,
 openalex_id) required by the Phase 0 gate. All embeddings are fixed at vector(768).
 
+Each CREATE/DROP TABLE is its own op.execute() call — asyncpg's prepared-statement
+protocol rejects multiple SQL commands in a single execute(), so one statement per
+string is required (not just a style preference).
+
 Revision ID: m2_tables
 Revises: m1_extension
 """
@@ -24,7 +28,11 @@ def upgrade() -> None:
             role       TEXT NOT NULL DEFAULT 'researcher',
             created_at TIMESTAMPTZ DEFAULT now()
         );
+        """
+    )
 
+    op.execute(
+        """
         CREATE TABLE institutions (
             id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             name       TEXT NOT NULL,
@@ -32,7 +40,11 @@ def upgrade() -> None:
             country    TEXT,
             created_at TIMESTAMPTZ DEFAULT now()
         );
+        """
+    )
 
+    op.execute(
+        """
         CREATE TABLE profiles (
             id                     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             user_id                UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -61,7 +73,11 @@ def upgrade() -> None:
             updated_at             TIMESTAMPTZ DEFAULT now(),
             UNIQUE (user_id)
         );
+        """
+    )
 
+    op.execute(
+        """
         CREATE TABLE ideas (
             id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             user_id    UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -71,7 +87,11 @@ def upgrade() -> None:
             embedding  VECTOR(768),
             created_at TIMESTAMPTZ DEFAULT now()
         );
+        """
+    )
 
+    op.execute(
+        """
         CREATE TABLE grants (
             id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             agency           TEXT NOT NULL,
@@ -85,7 +105,11 @@ def upgrade() -> None:
             source           TEXT DEFAULT 'seed',
             created_at       TIMESTAMPTZ DEFAULT now()
         );
+        """
+    )
 
+    op.execute(
+        """
         CREATE TABLE matches (
             id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             query_user_id   UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -97,7 +121,11 @@ def upgrade() -> None:
             explanation     TEXT,
             created_at      TIMESTAMPTZ DEFAULT now()
         );
+        """
+    )
 
+    op.execute(
+        """
         CREATE TABLE job_status (
             id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             job_type      TEXT NOT NULL,
@@ -109,7 +137,11 @@ def upgrade() -> None:
             created_at    TIMESTAMPTZ DEFAULT now(),
             updated_at    TIMESTAMPTZ DEFAULT now()
         );
+        """
+    )
 
+    op.execute(
+        """
         CREATE TABLE audit_logs (
             id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             actor_id    UUID,
@@ -124,15 +156,11 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute(
-        """
-        DROP TABLE IF EXISTS audit_logs;
-        DROP TABLE IF EXISTS job_status;
-        DROP TABLE IF EXISTS matches;
-        DROP TABLE IF EXISTS grants;
-        DROP TABLE IF EXISTS ideas;
-        DROP TABLE IF EXISTS profiles;
-        DROP TABLE IF EXISTS institutions;
-        DROP TABLE IF EXISTS user_roles;
-        """
-    )
+    op.execute("DROP TABLE IF EXISTS audit_logs;")
+    op.execute("DROP TABLE IF EXISTS job_status;")
+    op.execute("DROP TABLE IF EXISTS matches;")
+    op.execute("DROP TABLE IF EXISTS grants;")
+    op.execute("DROP TABLE IF EXISTS ideas;")
+    op.execute("DROP TABLE IF EXISTS profiles;")
+    op.execute("DROP TABLE IF EXISTS institutions;")
+    op.execute("DROP TABLE IF EXISTS user_roles;")

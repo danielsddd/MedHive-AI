@@ -5,6 +5,9 @@ vector_cosine_ops) so /match and /grants meet REQ-2 (<3s p95 over >=1,000 profil
 Covers the active profiles.embedding, the mpnet experiment column, and grants.embedding.
 Experiment columns gemini/biolord are indexed in Phase 3 when those experiments run.
 
+Each CREATE/DROP INDEX is its own op.execute() call — asyncpg's prepared-statement
+protocol rejects multiple SQL commands in a single execute().
+
 Revision ID: m3_hnsw_indexes
 Revises: m2_tables
 """
@@ -22,11 +25,17 @@ def upgrade() -> None:
         CREATE INDEX profiles_embedding_hnsw
             ON profiles USING hnsw (embedding vector_cosine_ops)
             WITH (m = 16, ef_construction = 64);
-
+        """
+    )
+    op.execute(
+        """
         CREATE INDEX profiles_embedding_mpnet_hnsw
             ON profiles USING hnsw (embedding_mpnet vector_cosine_ops)
             WITH (m = 16, ef_construction = 64);
-
+        """
+    )
+    op.execute(
+        """
         CREATE INDEX grants_embedding_hnsw
             ON grants USING hnsw (embedding vector_cosine_ops)
             WITH (m = 16, ef_construction = 64);
@@ -35,10 +44,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute(
-        """
-        DROP INDEX IF EXISTS grants_embedding_hnsw;
-        DROP INDEX IF EXISTS profiles_embedding_mpnet_hnsw;
-        DROP INDEX IF EXISTS profiles_embedding_hnsw;
-        """
-    )
+    op.execute("DROP INDEX IF EXISTS grants_embedding_hnsw;")
+    op.execute("DROP INDEX IF EXISTS profiles_embedding_mpnet_hnsw;")
+    op.execute("DROP INDEX IF EXISTS profiles_embedding_hnsw;")
