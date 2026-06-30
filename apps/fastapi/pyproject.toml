@@ -40,6 +40,7 @@ pdfplumber = "^0.11.0"
 python-docx = "^1.1.0"
 biopython = "^1.84"
 google-generativeai = "^0.8.0"
+python-multipart = "^0.0.12"  # required by FastAPI for File()/UploadFile (POST /profiles/ingest)
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.0"
