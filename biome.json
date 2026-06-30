@@ -1,7 +1,5 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-  "//": "Single source of truth for TS/JS formatting + linting. Biome replaces ESLint",
-  "//2": "to avoid the Next.js ESLint-vs-Biome fixes-on-save conflict (see ADR gotcha #8).",
   "organizeImports": { "enabled": true },
   "formatter": { "enabled": true, "indentStyle": "space", "indentWidth": 2, "lineWidth": 100 },
   "linter": {
