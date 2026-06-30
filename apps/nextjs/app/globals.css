@@ -15,7 +15,9 @@
   --accent-ink: 0 0% 100%;
 }
 
-* { border-color: hsl(var(--line)); }
+* {
+  border-color: hsl(var(--line));
+}
 
 body {
   background: hsl(var(--bg));
@@ -41,14 +43,32 @@ body {
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
-.field:focus { border-color: hsl(var(--accent)); box-shadow: 0 0 0 3px hsl(var(--accent) / 0.12); }
+.field:focus {
+  border-color: hsl(var(--accent));
+  box-shadow: 0 0 0 3px hsl(var(--accent) / 0.12);
+}
 
 .btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
-  background: hsl(var(--accent)); color: hsl(var(--accent-ink));
-  border-radius: 10px; padding: 0.6rem 1rem; font-weight: 600; font-size: 0.95rem;
-  cursor: pointer; transition: opacity 0.15s ease, transform 0.05s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-ink));
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.05s ease;
 }
-.btn:hover { opacity: 0.92; }
-.btn:active { transform: translateY(1px); }
-.btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.btn:hover {
+  opacity: 0.92;
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

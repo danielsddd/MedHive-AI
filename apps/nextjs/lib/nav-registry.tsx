@@ -3,7 +3,7 @@
  * entry here (no other changes). `permission` is null for everyone or an RBAC role string;
  * the nav component filters entries the current role may not see.
  */
-import { Home, User, Users, Briefcase, Lightbulb, Shield, type LucideIcon } from 'lucide-react'
+import { Briefcase, Home, Lightbulb, type LucideIcon, Shield, User, Users } from 'lucide-react'
 
 export type NavItem = { path: string; label: string; icon: LucideIcon; permission: string | null }
 

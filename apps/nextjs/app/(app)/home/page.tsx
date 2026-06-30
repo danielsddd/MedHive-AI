@@ -4,9 +4,9 @@
  * <-> embedding wiring is live before building features. Real feature cards land in later phases.
  */
 'use client'
-import { useQuery } from '@tanstack/react-query'
 import { useMe } from '@/hooks/use-me'
 import { apiFetch } from '@/lib/api-client'
+import { useQuery } from '@tanstack/react-query'
 
 type Health = {
   db: string
@@ -70,8 +70,8 @@ export default function HomePage() {
       <section className="card p-6">
         <h2 className="mb-2 text-lg font-semibold">Next steps</h2>
         <p style={{ color: 'hsl(var(--muted))' }}>
-          Profile ingestion, matching, grants, and ideas arrive in Phases 1–5. The foundations
-          here (auth glue, error contract, embedding + LLM gateways, RLS) are ready to build on.
+          Profile ingestion, matching, grants, and ideas arrive in Phases 1–5. The foundations here
+          (auth glue, error contract, embedding + LLM gateways, RLS) are ready to build on.
         </p>
       </section>
     </div>

@@ -14,7 +14,13 @@
     "title": "Neural Circuits of Chronic Pain (R21)",
     "description": "Exploratory funding for studies mapping the neural circuitry underlying chronic pain states using electrophysiology, optogenetics, or in vivo imaging in model systems.",
     "deadline": "2026-09-16",
-    "keywords": ["neuroscience", "chronic pain", "neural circuits", "optogenetics", "electrophysiology"],
+    "keywords": [
+      "neuroscience",
+      "chronic pain",
+      "neural circuits",
+      "optogenetics",
+      "electrophysiology"
+    ],
     "eligibility_text": "Domestic and foreign institutions eligible. Early-stage investigators encouraged.",
     "sub_domain": "neuroscience",
     "source": "seed"
@@ -24,7 +30,13 @@
     "title": "Host Immune Response to Emerging Viral Pathogens (U19)",
     "description": "Cooperative agreement funding multi-project programs characterizing innate and adaptive immune responses to emerging RNA viruses, including correlates of protection and vaccine target discovery.",
     "deadline": "2026-11-12",
-    "keywords": ["immunology", "virology", "vaccines", "innate immunity", "correlates of protection"],
+    "keywords": [
+      "immunology",
+      "virology",
+      "vaccines",
+      "innate immunity",
+      "correlates of protection"
+    ],
     "eligibility_text": "Requires a multi-PI program structure. U.S. institutions as lead; international partners permitted.",
     "sub_domain": "immunology",
     "source": "seed"
@@ -34,7 +46,13 @@
     "title": "Horizon Europe — AI for Precision Cardiology",
     "description": "Funds consortia developing trustworthy AI tools for risk stratification and treatment selection in cardiovascular disease, with mandatory clinical validation and explainability requirements.",
     "deadline": "2026-09-30",
-    "keywords": ["cardiology", "artificial intelligence", "precision medicine", "risk stratification", "explainability"],
+    "keywords": [
+      "cardiology",
+      "artificial intelligence",
+      "precision medicine",
+      "risk stratification",
+      "explainability"
+    ],
     "eligibility_text": "Requires a consortium of at least three independent legal entities from three different EU Member States or Associated Countries.",
     "sub_domain": "cardiology",
     "source": "seed"
@@ -44,7 +62,13 @@
     "title": "Horizon Europe — Genomic Surveillance of Antimicrobial Resistance",
     "description": "Supports cross-border platforms for genomic surveillance of antimicrobial-resistant pathogens, integrating sequencing, epidemiology, and open data sharing across health systems.",
     "deadline": "2026-12-08",
-    "keywords": ["genomics", "antimicrobial resistance", "surveillance", "sequencing", "epidemiology"],
+    "keywords": [
+      "genomics",
+      "antimicrobial resistance",
+      "surveillance",
+      "sequencing",
+      "epidemiology"
+    ],
     "eligibility_text": "Consortium-based. Public health agencies and academic partners encouraged to co-apply.",
     "sub_domain": "genomics",
     "source": "seed"
@@ -54,7 +78,13 @@
     "title": "Horizon Europe — Digital Tools for Population Mental Health",
     "description": "Funds development and evaluation of scalable digital interventions for population-level mental health, prioritizing equity, accessibility, and real-world effectiveness trials.",
     "deadline": "2026-10-21",
-    "keywords": ["public health", "mental health", "digital health", "health equity", "effectiveness trials"],
+    "keywords": [
+      "public health",
+      "mental health",
+      "digital health",
+      "health equity",
+      "effectiveness trials"
+    ],
     "eligibility_text": "Open to EU and Associated Country entities forming an eligible consortium.",
     "sub_domain": "public_health",
     "source": "seed"
@@ -64,7 +94,13 @@
     "title": "Israel Science Foundation — Individual Research Grant in Computational Biology",
     "description": "Supports individual investigators pursuing fundamental questions in computational and systems biology, including single-cell analysis, network modeling, and method development.",
     "deadline": "2026-11-25",
-    "keywords": ["computational biology", "single-cell", "systems biology", "network modeling", "methods"],
+    "keywords": [
+      "computational biology",
+      "single-cell",
+      "systems biology",
+      "network modeling",
+      "methods"
+    ],
     "eligibility_text": "Open to faculty at Israeli research institutions. One submission per PI per cycle.",
     "sub_domain": "computational_biology",
     "source": "seed"

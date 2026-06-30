@@ -4,11 +4,11 @@
  * requests the email; the actual new-password step is handled on Supabase's hosted recovery link.
  */
 'use client'
-import { useState } from 'react'
-import Link from 'next/link'
-import { toast } from 'sonner'
-import { getBrowserSupabase } from '@/lib/supabase/client'
 import { supabaseConfigured } from '@/lib/env'
+import { getBrowserSupabase } from '@/lib/supabase/client'
+import Link from 'next/link'
+import { useState } from 'react'
+import { toast } from 'sonner'
 
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState('')
@@ -61,7 +61,7 @@ export default function ResetPasswordPage() {
             onChange={(e) => setEmail(e.target.value)}
             disabled={!supabaseConfigured}
           />
-          <button className="btn mt-1" onClick={onSubmit} disabled={busy}>
+          <button type="button" className="btn mt-1" onClick={onSubmit} disabled={busy}>
             {busy ? 'Sending…' : 'Send reset link'}
           </button>
         </div>

@@ -4,10 +4,10 @@
  * from useMe(); adding a page never touches this file.
  */
 'use client'
+import { useMe } from '@/hooks/use-me'
+import { NAV } from '@/lib/nav-registry'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { NAV } from '@/lib/nav-registry'
-import { useMe } from '@/hooks/use-me'
 
 export function Nav() {
   const pathname = usePathname()

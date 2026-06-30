@@ -5,12 +5,12 @@
  * Errors are shown as toasts using the friendly mapper, never as raw provider strings.
  */
 'use client'
-import { useState } from 'react'
+import { supabaseConfigured } from '@/lib/env'
+import { getBrowserSupabase } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { toast } from 'sonner'
-import { getBrowserSupabase } from '@/lib/supabase/client'
-import { supabaseConfigured } from '@/lib/env'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -74,7 +74,7 @@ export default function RegisterPage() {
             onChange={(e) => setPassword(e.target.value)}
             disabled={!supabaseConfigured}
           />
-          <button className="btn mt-1" onClick={onSubmit} disabled={busy}>
+          <button type="button" className="btn mt-1" onClick={onSubmit} disabled={busy}>
             {busy ? 'Creating…' : supabaseConfigured ? 'Create account' : 'Continue in dev mode'}
           </button>
         </div>

@@ -4,8 +4,8 @@
  * login/register pages to start a session; the resulting JWT is forwarded to FastAPI.
  */
 'use client'
-import { createBrowserClient } from '@supabase/ssr'
 import { env, supabaseConfigured } from '@/lib/env'
+import { createBrowserClient } from '@supabase/ssr'
 
 export function getBrowserSupabase() {
   if (!supabaseConfigured) return null

@@ -1,3 +1,4 @@
+import { Providers } from '@/components/providers'
 /**
  * Root layout. Loads the display (Fraunces) + body (IBM Plex Sans) fonts via next/font and
  * exposes them as CSS variables, mounts global styles, and wraps the tree in app-wide
@@ -5,7 +6,6 @@
  */
 import type { Metadata } from 'next'
 import { Fraunces, IBM_Plex_Sans } from 'next/font/google'
-import { Providers } from '@/components/providers'
 import './globals.css'
 
 const display = Fraunces({ subsets: ['latin'], variable: '--font-display', display: 'swap' })

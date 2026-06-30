@@ -3,8 +3,8 @@
  * the "who am I" fetch so pages stay thin and the role drives nav/permission rendering.
  */
 'use client'
-import { useQuery } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api-client'
+import { useQuery } from '@tanstack/react-query'
 
 export type Me = { user_id: string; email: string | null; role: string }
 
